@@ -1,23 +1,13 @@
-import io.github.bonigarcia.wdm.WebDriverManager;
-import org.junit.After;
-import org.junit.Before;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import pages.MainPage;
-
 import java.util.Arrays;
 import java.util.Collection;
-
 import static org.junit.Assert.assertEquals;
 
     @RunWith(Parameterized.class)
-    public class ImportantQuestionsTest {
-    private WebDriver driver;
-    private MainPage mainPage;
+    public class ImportantQuestionsTest extends BaseTest {
     private final int accordionIndex;
     private final String expectedText;
 
@@ -40,24 +30,9 @@ import static org.junit.Assert.assertEquals;
             {7, "Да, обязательно. Всем самокатов! И Москве, и Московской области."},
     });
 }
-    @Before
-    public void setUp() {
-        WebDriverManager.chromedriver().setup();
-        driver = new ChromeDriver();
-        //WebDriverManager.firefoxdriver().setup();
-        //driver = new FirefoxDriver();
-        driver.get("https://qa-scooter.praktikum-services.ru/");
-        mainPage = new MainPage(driver);
-    }
-
     @Test
     public void testAccordionPanelText() {
     String actualText = mainPage.getAccordionPanelText(accordionIndex);
     assertEquals("Текст в аккордеоне не совпадает", expectedText, actualText);
-}
-
-    @After
-    public void teardown() {
-        driver.quit();
     }
 }

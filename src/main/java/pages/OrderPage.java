@@ -5,14 +5,15 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
-
+import java.util.List;
 
 
 public class OrderPage {
     private final WebDriver driver;
 
+
     // Локаторы формы заказа
-    private final By nameField = By.xpath(".//input[@placeholder='* Имя']");
+    public static final By nameField = By.xpath(".//input[@placeholder='* Имя']");
     private final By surnameField = By.xpath(".//input[@placeholder='* Фамилия']");
     private final By addressField = By.xpath(".//input[@placeholder='* Адрес: куда привезти заказ']");
     private final By metroField = By.cssSelector("input.select-search__input");
@@ -99,6 +100,9 @@ public class OrderPage {
     }
 
     public boolean isSuccessModalDisplayed() {
-        return driver.findElement(successModal).isDisplayed();
+        List<WebElement> modals = driver.findElements(successModal);
+        return !modals.isEmpty() &&
+                modals.get(0).isDisplayed() &&
+                modals.get(0).getText().contains("Заказ оформлен");
     }
 }

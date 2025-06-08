@@ -1,20 +1,11 @@
-import io.github.bonigarcia.wdm.WebDriverManager;
-import org.junit.After;
-import org.junit.Before;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import pages.MainPage;
 import pages.OrderPage;
-
-
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
@@ -22,11 +13,8 @@ import java.util.Collection;
 import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
-public class OrderTest {
-    private WebDriver driver;
-    private MainPage mainPage;
+public class OrderTest extends BaseTest {
     private OrderPage orderPage;
-
     private final boolean isTopButton;
     private final String name;
     private final String surname;
@@ -62,49 +50,28 @@ public class OrderTest {
     }
 
 
-    @Before
-    public void setup() {
-        //WebDriverManager.firefoxdriver().setup();
-        //driver = new FirefoxDriver();
-        WebDriverManager.chromedriver().setup();
-        driver = new ChromeDriver();
-        driver.get("https://qa-scooter.praktikum-services.ru/");
-        mainPage = new MainPage(driver);
-
-        new WebDriverWait(driver, Duration.ofSeconds(15))
-                .until(d -> ((JavascriptExecutor)d)
-                        .executeScript("return document.readyState").equals("complete"));
-    }
-
     @Test
     public void testOrderCreation() {
-        System.out.printf("Запуск теста с параметрами: isTopButton=%b, metro=%s, period=%s%n", isTopButton, metro, period);
-
+        System.out.printf("Запуск теста с параметрами: isTopButton=%b, metro=%s, period=%s%n",
+                isTopButton, metro, period);
         if (isTopButton) {
             mainPage.clickOrderButtonOnTop();
         } else {
             mainPage.clickOrderButtonBottom();
         }
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(".//input[@placeholder='* Имя']")));
-
+                .until(ExpectedConditions.visibilityOfElementLocated(OrderPage.nameField));
         orderPage = new OrderPage(driver);
         orderPage.fillFirstPage(name, surname, address, metro, phone);
         orderPage.fillSecondPage(date, period, isBlack, comment);
         orderPage.confirmOrder();
+        assertTrue("Модальное окно успешного заказа должно отображаться",
+                orderPage.isSuccessModalDisplayed());
 
-        assertTrue("Success modal should be displayed", orderPage.isSuccessModalDisplayed());
-        try {
-            String orderNumber = orderPage.getOrderNumber();
-            assertNotNull("Номер заказа не должен быть null", orderNumber);
-            assertFalse("Номер заказа не должен быть пустым", orderNumber.isEmpty());
-        } catch (RuntimeException e) {
-            fail("Ошибка при получении номера заказа: " + e.getMessage());
-        }
+        String orderNumber = orderPage.getOrderNumber();
+        assertNotNull("Номер заказа не должен быть null", orderNumber);
+        assertFalse("Номер заказа не должен быть пустым", orderNumber.isEmpty());
+        System.out.println("Успешно создан заказ №" + orderNumber);
     }
 
-    @After
-    public void teardown() {
-        driver.quit();
-    }
 }
